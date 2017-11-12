@@ -40,3 +40,9 @@ class ProviderLocationTestCase(TestCase):
         )
 
         self.assertEqual(res.status_code, 200)
+
+    def test_list(self):
+        ProviderLocationFactory.create_batch(50, provider=self.provider)
+        res = self.client.get('/api/v1/provider_locations/')
+
+        self.assertEqual(len(res.data['results']['features']), 10)

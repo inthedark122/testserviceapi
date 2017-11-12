@@ -30,3 +30,10 @@ class ProviderTestCase(TestCase):
         res = self.client.patch('/api/v1/providers/{}/'.format(provider.id), new_data.__dict__)
 
         self.assertEqual(res.status_code, 200)
+
+    def test_list(self):
+        ProviderFactory.create_batch(50)
+
+        res = self.client.get('/api/v1/providers/')
+
+        self.assertEqual(len(res.data['results']), 10)
