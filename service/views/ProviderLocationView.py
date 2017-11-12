@@ -13,7 +13,8 @@
     можно в таком случае поднять несколько инстансов.
 
 """
-from functools import lru_cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework_gis.filters import InBBoxFilter, DistanceToPointFilter
@@ -46,6 +47,6 @@ class ProviderLocationView(viewsets.ModelViewSet):
         'provider__organization_name',
     )
 
-    @lru_cache(maxsize=None)
-    def list(self, *args, **kwargs):
-        return super(ProviderLocationView, self).list(*args, **kwargs)
+    @method_decorator(cache_page(60))
+    def dispatch(self, *args, **kwargs):
+        return super(ProviderLocationView, self).dispatch(*args, **kwargs)
