@@ -1,3 +1,19 @@
+"""
+Мысли про оптимизацию
+1. Кеширование - в данном случае может привести к потери производительности,
+    т.к. данные могут обновляться чаще, чем будет происходить кеширования.
+    Самый простой споос это lru-cache встроенный в python.
+    Сложнее - хранить кеш на уровне бд. Хранение кеша на уровне бд позволять достичь одинакового контента
+    на разных микросервисах.
+2. Кеширование с помощью django утилит - происходит на уровне http коннекта, что контролировать очень сложно.
+
+Заключение:
+    Кеширование применяется в зависимости от типа использования контента,
+    если много данных идет на вставку, то смысла от кеширования не будет,
+    можно в таком случае поднять несколько инстансов.
+
+"""
+from functools import lru_cache
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework_gis.filters import InBBoxFilter, DistanceToPointFilter
@@ -29,3 +45,7 @@ class ProviderLocationView(viewsets.ModelViewSet):
     search_fields = (
         'provider__organization_name',
     )
+
+    @lru_cache(maxsize=None)
+    def list(self, *args, **kwargs):
+        return super(ProviderLocationView, self).list(*args, **kwargs)
