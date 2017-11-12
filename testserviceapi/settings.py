@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'srkqw#$og4a9#gj%yy32&pcm#_o6lf@f_7jar*lb*-%fi645ed'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'true') == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -36,8 +36,18 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     # 'django.contrib.sessions',
     # 'django.contrib.messages',
-    # 'django.contrib.staticfiles',
+    'django.contrib.staticfiles',
+    'django.contrib.gis',
+    'rest_framework',
+    'rest_framework_gis',
+    'django_filters',
+    'service',
 ]
+
+if DEBUG:
+    INSTALLED_APPS = INSTALLED_APPS + [
+        'debug_toolbar',
+    ]
 
 MIDDLEWARE = [
     # 'django.middleware.security.SecurityMiddleware',
@@ -49,23 +59,28 @@ MIDDLEWARE = [
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+if DEBUG:
+    MIDDLEWARE = MIDDLEWARE + [
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    ]
+
 ROOT_URLCONF = 'testserviceapi.urls'
 
-# TEMPLATES = [
-#     {
-#         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-#         'DIRS': [],
-#         'APP_DIRS': True,
-#         'OPTIONS': {
-#             'context_processors': [
-#                 'django.template.context_processors.debug',
-#                 'django.template.context_processors.request',
-#                 'django.contrib.auth.context_processors.auth',
-#                 'django.contrib.messages.context_processors.messages',
-#             ],
-#         },
-#     },
-# ]
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 WSGI_APPLICATION = 'testserviceapi.wsgi.application'
 
@@ -75,12 +90,12 @@ WSGI_APPLICATION = 'testserviceapi.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'testserviceapi',
-        'USER' : 'postgres',
-        'PASSWORD' : 'postgres',
-        'HOST' : '127.0.0.1',
-        'PORT' : '5432',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.getenv('DATABASE_NAME', 'testserviceapi'),
+        'USER' : os.getenv('DATABASE_USERNAME', 'postgres'),
+        'PASSWORD' : os.getenv('DATABASE_PASSWORD', 'postgres'),
+        'HOST' : os.getenv('DATABASE_HOST', '127.0.0.1'),
+        'PORT' : os.getenv('DATABASE_PORT', '5432'),
     }
 }
 
@@ -102,6 +117,16 @@ DATABASES = {
 #         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
 #     },
 # ]
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'UNAUTHENTICATED_USER': (),  # Api работает без авторизации
+}
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 
 # Internationalization
