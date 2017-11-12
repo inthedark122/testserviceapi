@@ -1,0 +1,38 @@
+version: '2'
+
+services:
+  db:
+    image: mdillon/postgis
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=testserciceapi_production
+      - DATABASE_USERNAME=testserciceapi
+      - DATABASE_PASSWORD=testserciceapi
+    volumes:
+      - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+  api:
+    build: .
+    command:
+      - ./wait-for-it.sh
+      - db:5432
+      - --
+      - gunicorn -w 4 --bind 0.0.0.0:8000 testserviceapi.wsgi
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=testserciceapi_production
+      - DATABASE_USERNAME=testserciceapi
+      - DATABASE_PASSWORD=testserciceapi
+      - DEBUG=false
+
+networks:
+  default:
+    external:
+      name: testserciceapi
